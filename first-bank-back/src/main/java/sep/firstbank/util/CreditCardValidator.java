@@ -23,12 +23,17 @@ public class CreditCardValidator {
         return  cardName.equals(dtoName);
     }
 
-    private static boolean validateExpirationDate(LocalDate expDate, String dtoDate){
-        LocalDate dtoExpDate = LocalDate.of(getYear(dtoDate), getMonth(dtoDate), 1);
+    private static boolean validateExpirationDate(LocalDate expDate, String dtoDate) throws CreditCardInfoNotValidException {
+        LocalDate dtoExpDate = getDateFromDtoDate(dtoDate);
         if(dtoExpDate.getMonthValue() != expDate.getMonthValue() || dtoExpDate.getYear() != expDate.getYear()) {
             return false;
         }
         return isNotExpired(expDate.getYear(), expDate.getMonthValue());
+    }
+
+    private static LocalDate getDateFromDtoDate(String dtoDate) throws CreditCardInfoNotValidException {
+        if(getMonth(dtoDate) < 1 || getMonth(dtoDate) > 12) throw new CreditCardInfoNotValidException();
+        return LocalDate.of(getYear(dtoDate), getMonth(dtoDate), 1);
     }
 
     private static boolean isNotExpired(int year, int month) {

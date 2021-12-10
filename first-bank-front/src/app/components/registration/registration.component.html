@@ -1,0 +1,83 @@
+<div class="div1">
+  <mat-card class="card1">
+    <form
+      (submit)="register()"
+      #feedform="ngForm"
+      style="width: 80%"
+      novalidate
+    >
+      <h2 style="text-align: center">Get Merchant ID and Merchant Password</h2>
+
+      <div class="center">
+        <mat-form-field style="width: 100%">
+          <mat-label>PAN</mat-label>
+          <input
+            matInput
+            [(ngModel)]="dto.pan"
+            name="pan"
+            maxlength="16"
+            style="height: 40%"
+            [formControl]="panControl"
+          />
+        </mat-form-field>
+      </div>
+
+      <div class="center">
+        <mat-form-field style="width: 100%">
+          <mat-label>Card Holder Name</mat-label>
+          <input
+            matInput
+            [(ngModel)]="dto.cardHolderName"
+            name="cardHolderName"
+            style="height: 40%"
+            [formControl]="cardHolderNameControl"
+          />
+        </mat-form-field>
+      </div>
+      <div class="center">
+        <mat-form-field style="width: 100%">
+          <mat-label>Card Security Code</mat-label>
+          <input
+            name="securityCardNumber"
+            matInput
+            [(ngModel)]="dto.securityCode"
+            maxlength="3"
+            style="height: 40%"
+            [formControl]="securityCodeControl"
+          />
+        </mat-form-field>
+      </div>
+      <div class="center">
+        <mat-form-field style="width: 100%">
+          <mat-label>Expiration Date</mat-label>
+          <input
+            name="expirationDate"
+            matInput
+            placeholder="MM/yyyy"
+            maxlength="7"
+            [(ngModel)]="dto.expirationDate"
+            style="height: 40%"
+            [formControl]="expirationDateControl"
+          />
+        </mat-form-field>
+      </div>
+      <div style="text-align: center; margin-top: 50px">
+        <button
+          id="registerButton"
+          [disabled]="
+            !this.panControl.valid ||
+            !this.cardHolderNameControl.valid ||
+            !this.securityCodeControl.valid ||
+            !this.expirationDateControl.valid
+          "
+          mat-raised-button
+          color="primary"
+          type="submit"
+          style="padding: 12px 32px; opacity: 120%; margin-bottom: 10px"
+        >
+          Generate
+        </button>
+      </div>
+    </form>
+  </mat-card>
+</div>
