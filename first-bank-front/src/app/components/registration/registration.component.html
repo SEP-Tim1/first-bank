@@ -5,6 +5,7 @@
       #feedform="ngForm"
       style="width: 80%"
       novalidate
+      *ngIf="this.viewForm"
     >
       <h2 style="text-align: center">Get Merchant ID and Merchant Password</h2>
 
@@ -76,6 +77,45 @@
           style="padding: 12px 32px; opacity: 120%; margin-bottom: 10px"
         >
           Generate
+        </button>
+      </div>
+    </form>
+    <form
+      (submit)="home()"
+      #feedform="ngForm"
+      style="width: 80%"
+      novalidate
+      *ngIf="!this.viewForm"
+    >
+      <h2 style="text-align: center">Merchant ID and Merchant Password</h2>
+
+      <div class="center">
+        <mat-form-field style="width: 100%">
+          <h3 style="text-align: center">Merchant ID:</h3>
+          <input readonly name="mid" matInput [(ngModel)]="merchant.mid" />
+        </mat-form-field>
+      </div>
+
+      <div class="center">
+        <mat-form-field style="width: 100%">
+          <h3 style="text-align: center">Merchant Password:</h3>
+          <input
+            readonly
+            name="mpassword"
+            matInput
+            [(ngModel)]="merchant.mpassword"
+          />
+        </mat-form-field>
+      </div>
+      <div style="text-align: center; margin-top: 50px">
+        <button
+          id="homeButton"
+          mat-raised-button
+          color="primary"
+          type="submit"
+          style="padding: 12px 32px; opacity: 120%; margin-bottom: 10px"
+        >
+          Ok
         </button>
       </div>
     </form>

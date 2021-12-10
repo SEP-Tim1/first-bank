@@ -1,3 +1,3 @@
 export class MerchantDTO {
-  constructor(public mId: number, public mPassword: string) {}
+  constructor(public mid: number, public mpassword: string) {}
 }

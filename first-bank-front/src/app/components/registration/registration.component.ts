@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
 import { CardInfoDTO } from 'src/app/dtos/CardInfoDTO';
 import { MerchantDTO } from 'src/app/dtos/MerchantDTO';
 import { BankService } from 'src/app/service/bank.service';
@@ -13,6 +14,7 @@ import { BankService } from 'src/app/service/bank.service';
 export class RegistrationComponent implements OnInit {
   dto = new CardInfoDTO('', '', '', '');
   merchant = new MerchantDTO(0, '');
+  viewForm = true;
 
   panControl = new FormControl('', [
     Validators.required,
@@ -36,16 +38,30 @@ export class RegistrationComponent implements OnInit {
     Validators.pattern('\\d{2}/\\d{4}'),
   ]);
 
-  constructor(private _snackBar: MatSnackBar, private _service: BankService) {}
+  constructor(
+    private _snackBar: MatSnackBar,
+    private _service: BankService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {}
 
   register() {
-    console.log(this.dto);
-    this._service.register(this.dto).subscribe((response) => {
-      console.log(response);
-    });
-    this.openSnackBar('BRAVOOOOOOOOOOO', 'ahahhahah');
+    this._service.register(this.dto).subscribe(
+      (response) => {
+        console.log(response);
+        this.merchant = response;
+        this.viewForm = false;
+        this.openSnackBar('BRAVOOOOOOOOOOO', 'ahahhahah');
+      },
+      (error) => {
+        this.openSnackBar(error.error, 'Ok');
+      }
+    );
+  }
+
+  home() {
+    this.router.navigate(['']);
   }
 
   openSnackBar(message: string, action: string) {
