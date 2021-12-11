@@ -3,6 +3,7 @@ package sep.firstbank.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sep.firstbank.dtos.CardInfoDTO;
+import sep.firstbank.dtos.MerchantCredentialsDTO;
 import sep.firstbank.dtos.MerchantDTO;
 import sep.firstbank.exceptions.CreditCardInfoNotValidException;
 import sep.firstbank.exceptions.CreditCardNotFoundException;
@@ -30,6 +31,11 @@ public class AccountService {
     public Account getById(long id) throws AccountNotFoundException {
         if(accountRepository.findById(id).isPresent()) return accountRepository.findById(id).get();
         throw new AccountNotFoundException();
+    }
+
+    public void validate(MerchantCredentialsDTO dto) throws AccountNotFoundException {
+        Account account = accountRepository.findByMerchantIdAndMerchantPassword(dto.getMid(), dto.getMpassword());
+        if (account == null) throw new AccountNotFoundException();
     }
 
     public MerchantDTO register(CardInfoDTO dto) throws CreditCardNotFoundException, CreditCardInfoNotValidException, AccountNotFoundException {

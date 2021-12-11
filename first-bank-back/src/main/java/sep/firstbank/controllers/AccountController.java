@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sep.firstbank.dtos.CardInfoDTO;
+import sep.firstbank.dtos.MerchantCredentialsDTO;
 import sep.firstbank.exceptions.CreditCardInfoNotValidException;
 import sep.firstbank.exceptions.CreditCardNotFoundException;
 import sep.firstbank.model.Account;
@@ -41,5 +42,10 @@ public class AccountController {
         } catch (CreditCardInfoNotValidException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @PostMapping("validate")
+    public void validate(@RequestBody MerchantCredentialsDTO dto) throws AccountNotFoundException {
+        accountService.validate(dto);
     }
 }

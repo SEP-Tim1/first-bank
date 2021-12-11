@@ -6,4 +6,5 @@ import sep.firstbank.model.Account;
 
 @Repository
 public interface AccountRepository extends CrudRepository<Account, Long> {
+    Account findByMerchantIdAndMerchantPassword(long merchantId, String merchantPassword);
 }
