@@ -23,9 +23,10 @@ import { RegistrationComponent } from './components/registration/registration.co
 import { CardInfoComponent } from './components/card-info/card-info.component';
 import { HomeComponent } from './components/home/home.component';
 import { NotFoundComponent } from './components/not-found/not-found.component';
+import { PaymentInfoComponent } from './components/payment-info/payment-info.component';
 
 @NgModule({
-  declarations: [AppComponent, RegistrationComponent, CardInfoComponent, HomeComponent, NotFoundComponent],
+  declarations: [AppComponent, RegistrationComponent, CardInfoComponent, HomeComponent, NotFoundComponent, PaymentInfoComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,
