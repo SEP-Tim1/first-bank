@@ -1,5 +1,6 @@
 package sep.firstbank.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sep.firstbank.dtos.CardInfoDTO;
@@ -18,6 +19,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 
 import javax.security.auth.login.AccountNotFoundException;
 
+@Slf4j
 @Service
 public class AccountService {
 
@@ -53,6 +55,7 @@ public class AccountService {
         a.setMerchantId(a.getId() + MIG);
         a.setMerchantPassword(RandomStringUtils.randomAlphanumeric(20));
         accountRepository.save(a);
+        log.info("Account (id=" + a.getId() + ") registered for e-banking services");
         return new MerchantDTO(a.getMerchantId(), a.getMerchantPassword());
     }
 
@@ -69,7 +72,10 @@ public class AccountService {
     private Invoice payInThisBank(CardInfoDTO dto, Invoice invoice) throws InvoiceAlreadyPaidException, CreditCardNotFoundException, CreditCardInfoNotValidException, NoMoneyException {
         CreditCard card = cardService.getByPAN(dto.getPan());
         CreditCardValidator.validate(card, dto);
-        if (invoice.getTransaction() != null) throw new InvoiceAlreadyPaidException();
+        if (invoice.getTransaction() != null) {
+            log.warn("Attempt to pay invoice (id=" + invoice.getId() + ") that was already payed for");
+            throw new InvoiceAlreadyPaidException();
+        }
         return makeTransaction(card, invoice);
     }
 
@@ -84,8 +90,12 @@ public class AccountService {
             seller.setBalance(seller.getBalance().add(invoice.getAmount()));
             accountRepository.save(buyer);
             accountRepository.save(seller);
+            log.info("Transaction (id=" + transaction.getId() + ") created for invoice (id=" + invoice.getId() +
+                    ") - seller account id=" + seller.getId() + " buyer account id=" + buyer.getId());
             return invoice;
         } else {
+            log.info("Unsuccessful transaction (insufficient funds) for invoice (id=" + invoice.getId() +
+                    ") - seller account id=" + seller.getId() + " buyer account id=" + buyer.getId());
             throw new NoMoneyException();
         }
     }

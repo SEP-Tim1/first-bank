@@ -1,5 +1,6 @@
 package sep.firstbank.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sep.firstbank.clients.PSPClient;
@@ -16,6 +17,7 @@ import sep.firstbank.repositories.TransactionRepository;
 import javax.security.auth.login.AccountNotFoundException;
 import java.time.LocalDateTime;
 
+@Slf4j
 @Service
 public class InvoiceService {
     private final InvoiceRepository invoiceRepository;
@@ -35,6 +37,7 @@ public class InvoiceService {
     public InvoiceResponseDTO generateResponse(InvoiceDTO dto) throws AccountNotFoundException {
         Account account = validate(dto);
         Invoice invoice = invoiceRepository.save(new Invoice(dto, account));
+        log.info("Invoice (id=" + invoice.getId() + ") for account (id=" + account.getId() + ") created");
         return new InvoiceResponseDTO(PAYMENT_URL + invoice.getId(), invoice.getId());
     }
 
