@@ -14,6 +14,8 @@ public class PaymentResponseDTO {
 
     private long merchantOrderId;
 
+    private long requestId;
+
     private long acquirerOrderId;
 
     private LocalDateTime acquirerTimestamp;

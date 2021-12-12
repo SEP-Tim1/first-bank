@@ -15,6 +15,7 @@ public class InvoiceDTO {
     private String mPassword;
     private BigDecimal amount;
     private long merchantOrderId;
+    private long requestId;
     private LocalDateTime merchantTimestamp;
     private String successUrl;
     private String failureUrl;

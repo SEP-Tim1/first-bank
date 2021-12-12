@@ -30,6 +30,9 @@ public class Invoice {
     private long merchantOrderId;
 
     @Column
+    private long requestId;
+
+    @Column
     private LocalDateTime merchantTimestamp;
 
     @Column
@@ -48,6 +51,7 @@ public class Invoice {
         this.amount = dto.getAmount();
         this.accountId = account.getId();
         this.merchantOrderId = dto.getMerchantOrderId();
+        this.requestId = dto.getRequestId();
         this.merchantTimestamp = dto.getMerchantTimestamp();
         this.successUrl = dto.getSuccessUrl();
         this.failureUrl = dto.getFailureUrl();
