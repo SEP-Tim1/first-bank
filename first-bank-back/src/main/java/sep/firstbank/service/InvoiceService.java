@@ -44,8 +44,8 @@ public class InvoiceService {
         return account;
     }
 
-    public RedirectUrlDTO notifySuccess(Invoice invoice){
-        PaymentResponseDTO dto = new PaymentResponseDTO("SUCCESS", invoice.getMerchantOrderId(), invoice.getId(), invoice.getTransaction().getCreated(), invoice.getId());
+    public RedirectUrlDTO notifySuccess(Invoice invoice, String message){
+        PaymentResponseDTO dto = new PaymentResponseDTO("SUCCESS", invoice.getMerchantOrderId(), invoice.getId(), invoice.getTransaction().getCreated(), invoice.getId(), message);
         try{
             pspClient.bankPaymentResponse(dto);
         } catch (Exception e) {
@@ -54,18 +54,18 @@ public class InvoiceService {
         return new RedirectUrlDTO(invoice.getSuccessUrl());
     }
 
-    public RedirectUrlDTO notifyError(Invoice invoice){
-        PaymentResponseDTO dto = new PaymentResponseDTO("ERROR", invoice.getMerchantOrderId(), invoice.getId(), LocalDateTime.now(), invoice.getId());
+    public RedirectUrlDTO notifyError(Invoice invoice, String message){
+        PaymentResponseDTO dto = new PaymentResponseDTO("ERROR", invoice.getMerchantOrderId(), invoice.getId(), LocalDateTime.now(), invoice.getId(), message);
         try{
             pspClient.bankPaymentResponse(dto);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return new RedirectUrlDTO("");
+        return new RedirectUrlDTO(invoice.getErrorUrl());
     }
 
-    public RedirectUrlDTO notifyFailure(Invoice invoice){
-        PaymentResponseDTO dto = new PaymentResponseDTO("FAILURE", invoice.getMerchantOrderId(), invoice.getId(), LocalDateTime.now(), invoice.getId());
+    public RedirectUrlDTO notifyFailure(Invoice invoice, String message){
+        PaymentResponseDTO dto = new PaymentResponseDTO("FAILURE", invoice.getMerchantOrderId(), invoice.getId(), LocalDateTime.now(), invoice.getId(), message);
         try{
             pspClient.bankPaymentResponse(dto);
         } catch (Exception e) {

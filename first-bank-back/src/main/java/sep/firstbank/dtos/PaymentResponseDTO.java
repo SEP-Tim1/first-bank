@@ -19,4 +19,6 @@ public class PaymentResponseDTO {
     private LocalDateTime acquirerTimestamp;
 
     private long paymentId;
+
+    private String errorMessage;
 }

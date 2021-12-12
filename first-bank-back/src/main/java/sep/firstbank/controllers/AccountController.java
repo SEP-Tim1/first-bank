@@ -53,11 +53,11 @@ public class AccountController {
             Invoice invoice = accountService.getInvoice(dto, invoiceId);
             try {
                 invoice = accountService.pay(dto, invoice);
-                return ResponseEntity.ok(invoiceService.notifySuccess(invoice));
+                return ResponseEntity.ok(invoiceService.notifySuccess(invoice, ""));
             } catch (InvoiceAlreadyPaidException | NoMoneyException e) {
-                return ResponseEntity.ok(invoiceService.notifyFailure(invoice));
+                return ResponseEntity.ok(invoiceService.notifyFailure(invoice, e.getMessage()));
             } catch (CreditCardInfoNotValidException | CreditCardNotFoundException e) {
-                return ResponseEntity.ok(invoiceService.notifyError(invoice));
+                return ResponseEntity.ok(invoiceService.notifyError(invoice, e.getMessage()));
             }
         } catch (InvoiceNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
