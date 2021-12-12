@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "transaction")
@@ -34,6 +34,15 @@ public class Transaction {
     private String currency;
 
     @Column
-    private LocalDate created;
+    private LocalDateTime created;
+
+    public Transaction(Invoice invoice, long fromId, long toId){
+        this.fromId = fromId;
+        this.toId = toId;
+        this.amount = invoice.getAmount();
+        this.currency = "RSD";
+        this.created = LocalDateTime.now();
+    }
+
 
 }

@@ -17,7 +17,6 @@ public class InvoiceController {
         this.invoiceService = invoiceService;
     }
 
-
     @PostMapping("generate")
     public InvoiceResponseDTO generate(@RequestBody InvoiceDTO dto) throws AccountNotFoundException {
         return invoiceService.generateResponse(dto);

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { CardInfoDTO } from 'src/app/dtos/CardInfoDTO';
 import { BankService } from 'src/app/service/bank.service';
 
@@ -12,6 +13,7 @@ import { BankService } from 'src/app/service/bank.service';
 })
 export class PaymentInfoComponent implements OnInit {
   dto = new CardInfoDTO('', '', '', '');
+  purchaseId = -1;
 
   panControl = new FormControl('', [
     Validators.required,
@@ -38,12 +40,28 @@ export class PaymentInfoComponent implements OnInit {
   constructor(
     private _snackBar: MatSnackBar,
     private _service: BankService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.purchaseId = Number(this.route.snapshot.paramMap.get('id'));
+  }
 
-  submit() {}
+  submit() {
+    this._service.pay(this.purchaseId, this.dto).subscribe(
+      (response) => {
+        console.log(response);
+        if (response.redirectUrl === '') {
+          window.location.href =
+            'http://localhost:4200/error/' + this.purchaseId;
+        } else window.location.href = response.redirectUrl;
+      },
+      (error) => {
+        console.log(error.error);
+      }
+    );
+  }
 
   openSnackBar(message: string) {
     this._snackBar.open(message, 'hehe', {

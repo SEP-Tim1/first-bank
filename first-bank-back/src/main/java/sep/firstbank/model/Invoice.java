@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import sep.firstbank.dtos.InvoiceDTO;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -20,7 +21,7 @@ public class Invoice {
     private long id;
 
     @Column
-    private float amount;
+    private BigDecimal amount;
 
     @Column
     private long accountId;
