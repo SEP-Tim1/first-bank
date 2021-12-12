@@ -58,13 +58,13 @@ export class PaymentInfoComponent implements OnInit {
         } else window.location.href = response.redirectUrl;
       },
       (error) => {
-        console.log(error.error);
+        this.openSnackBar(error.error);
       }
     );
   }
 
   openSnackBar(message: string) {
-    this._snackBar.open(message, 'hehe', {
+    this._snackBar.open(message, 'Ok', {
       duration: 10000,
     });
   }

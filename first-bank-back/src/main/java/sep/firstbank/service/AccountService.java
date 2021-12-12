@@ -26,6 +26,7 @@ public class AccountService {
     private final InvoiceRepository invoiceRepository;
     private final TransactionRepository transactionRepository;
     private static final long MIG = 603759;
+    private static final String BANK_NUMBER = "00000";
 
     @Autowired
     public AccountService(AccountRepository accountRepository, CreditCardService cardService, InvoiceRepository invoiceRepository, TransactionRepository transactionRepository){
@@ -55,16 +56,20 @@ public class AccountService {
         return new MerchantDTO(a.getMerchantId(), a.getMerchantPassword());
     }
 
-    public Invoice getInvoice(CardInfoDTO dto, long invoiceId) throws CreditCardNotFoundException, CreditCardInfoNotValidException, InvoiceNotFoundException {
+    public Invoice getInvoice(CardInfoDTO dto, long invoiceId) throws InvoiceNotFoundException {
         if (!invoiceRepository.findById(invoiceId).isPresent()) throw new InvoiceNotFoundException();
-        CreditCard card = cardService.getByPAN(dto.getPan());
-        CreditCardValidator.validate(card, dto);
         return invoiceRepository.findById(invoiceId).get();
     }
 
-    public Invoice pay(CardInfoDTO dto, Invoice invoice) throws InvoiceAlreadyPaidException, NoMoneyException, CreditCardNotFoundException {
+    public Invoice pay(CardInfoDTO dto, Invoice invoice) throws InvoiceAlreadyPaidException, NoMoneyException, CreditCardNotFoundException, CreditCardInfoNotValidException {
+        if(isCardInThisBank(dto.getPan())) return payInThisBank(dto, invoice);
+        return callPCC(dto, invoice);
+    }
+
+    private Invoice payInThisBank(CardInfoDTO dto, Invoice invoice) throws InvoiceAlreadyPaidException, CreditCardNotFoundException, CreditCardInfoNotValidException, NoMoneyException {
         CreditCard card = cardService.getByPAN(dto.getPan());
-        if(invoice.getTransaction() != null) throw new InvoiceAlreadyPaidException();
+        CreditCardValidator.validate(card, dto);
+        if (invoice.getTransaction() != null) throw new InvoiceAlreadyPaidException();
         return makeTransaction(card, invoice);
     }
 
@@ -83,5 +88,15 @@ public class AccountService {
         } else {
             throw new NoMoneyException();
         }
+    }
+
+    private Invoice callPCC(CardInfoDTO dto, Invoice invoice){
+        //TODO : make pcc client and second bank
+        return invoice;
+    }
+
+    private boolean isCardInThisBank(String pan){
+        String cardBankNumber = pan.substring(1, 6);
+        return cardBankNumber.equals(BANK_NUMBER);
     }
 }
