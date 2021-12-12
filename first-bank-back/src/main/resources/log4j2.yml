@@ -1,0 +1,33 @@
+Configuration:
+  status: warn
+
+  appenders:
+    Console:
+      name: LogToConsole
+      PatternLayout:
+        Pattern: "[%-5level] %d{ISO8601_OFFSET_DATE_TIME_HH} [%t] %c{1} - %msg%n"
+
+    RollingFile:
+      - name: LogToRollingFile
+        fileName: logs/app.log
+        filePattern: "logs/$${date:yyyy-MM}/app-%d{MM-dd-yyyy}-%i.log"
+        PatternLayout:
+          pattern: "[%level{length=5}] %d{ISO8601_OFFSET_DATE_TIME_HH} [%t] %c{2} - %M - %m%n"
+        Policies:
+          SizeBasedTriggeringPolicy:
+            size: 10MB
+        DefaultRollOverStrategy:
+          max: 10
+
+  Loggers:
+    logger:
+      - name: sep.firstbank
+        level: info
+        additivity: false
+        AppenderRef:
+          - ref: LogToRollingFile
+
+    Root:
+      level: info
+      AppenderRef:
+        ref: LogToConsole
