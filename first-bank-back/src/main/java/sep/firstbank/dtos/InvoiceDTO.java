@@ -20,5 +20,6 @@ public class InvoiceDTO {
     private String successUrl;
     private String failureUrl;
     private String errorUrl;
+    private String callbackUrl;
 }
 

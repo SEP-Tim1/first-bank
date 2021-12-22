@@ -2,6 +2,7 @@ package sep.firstbank.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import sep.firstbank.clients.PSPClient;
 import sep.firstbank.dtos.InvoiceDTO;
@@ -15,6 +16,7 @@ import sep.firstbank.repositories.InvoiceRepository;
 import sep.firstbank.repositories.TransactionRepository;
 
 import javax.security.auth.login.AccountNotFoundException;
+import java.net.URI;
 import java.time.LocalDateTime;
 
 @Slf4j
@@ -24,7 +26,8 @@ public class InvoiceService {
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
     private final PSPClient pspClient;
-    private static final String PAYMENT_URL = "http://localhost:4300/make-payment/";
+    @Value("${front.url}")
+    private String frontUrl;
 
     @Autowired
     public InvoiceService(InvoiceRepository invoiceRepository, TransactionRepository transactionRepository, AccountRepository accountRepository, PSPClient pspClient) {
@@ -38,7 +41,7 @@ public class InvoiceService {
         Account account = validate(dto);
         Invoice invoice = invoiceRepository.save(new Invoice(dto, account));
         log.info("Invoice (id=" + invoice.getId() + ") for account (id=" + account.getId() + ") created");
-        return new InvoiceResponseDTO(PAYMENT_URL + invoice.getId(), invoice.getId());
+        return new InvoiceResponseDTO(frontUrl + "make-payment/" + invoice.getId(), invoice.getId());
     }
 
     public Account validate(InvoiceDTO dto) throws AccountNotFoundException {
@@ -50,7 +53,7 @@ public class InvoiceService {
     public RedirectUrlDTO notifySuccess(Invoice invoice, String message){
         PaymentResponseDTO dto = new PaymentResponseDTO("SUCCESS", invoice.getMerchantOrderId(), invoice.getRequestId(), invoice.getId(), invoice.getTransaction().getCreated(), invoice.getId(), message);
         try{
-            pspClient.bankPaymentResponse(dto);
+            pspClient.bankPaymentResponse(URI.create(invoice.getCallbackUrl()), dto);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -60,7 +63,7 @@ public class InvoiceService {
     public RedirectUrlDTO notifyError(Invoice invoice, String message){
         PaymentResponseDTO dto = new PaymentResponseDTO("ERROR", invoice.getMerchantOrderId(), invoice.getRequestId(), invoice.getId(), LocalDateTime.now(), invoice.getId(), message);
         try{
-            pspClient.bankPaymentResponse(dto);
+            pspClient.bankPaymentResponse(URI.create(invoice.getCallbackUrl()), dto);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -70,7 +73,7 @@ public class InvoiceService {
     public RedirectUrlDTO notifyFailure(Invoice invoice, String message){
         PaymentResponseDTO dto = new PaymentResponseDTO("FAILURE", invoice.getMerchantOrderId(), invoice.getRequestId(), invoice.getId(), LocalDateTime.now(), invoice.getId(), message);
         try{
-            pspClient.bankPaymentResponse(dto);
+            pspClient.bankPaymentResponse(URI.create(invoice.getCallbackUrl()), dto);
         } catch (Exception e) {
             e.printStackTrace();
         }

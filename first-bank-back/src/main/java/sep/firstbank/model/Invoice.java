@@ -44,6 +44,9 @@ public class Invoice {
     @Column
     private String errorUrl;
 
+    @Column
+    private String callbackUrl;
+
     @OneToOne
     private Transaction transaction;
 
@@ -56,6 +59,7 @@ public class Invoice {
         this.successUrl = dto.getSuccessUrl();
         this.failureUrl = dto.getFailureUrl();
         this.errorUrl = dto.getErrorUrl();
+        this.callbackUrl = dto.getCallbackUrl();
     }
 
 }

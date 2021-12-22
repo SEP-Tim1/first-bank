@@ -5,9 +5,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import sep.firstbank.dtos.PaymentResponseDTO;
 
-@FeignClient(url= "localhost:8090", name = "psp")
+import java.net.URI;
+
+@FeignClient(name="a", url="a")
 public interface PSPClient {
 
-    @PostMapping("card/card/bank-payment-response")
-    void bankPaymentResponse(@RequestBody PaymentResponseDTO dto);
+    @PostMapping
+    void bankPaymentResponse(URI baseUri, @RequestBody PaymentResponseDTO dto);
 }
