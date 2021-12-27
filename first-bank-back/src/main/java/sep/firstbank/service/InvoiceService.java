@@ -9,6 +9,7 @@ import sep.firstbank.dtos.InvoiceDTO;
 import sep.firstbank.dtos.InvoiceResponseDTO;
 import sep.firstbank.dtos.PaymentResponseDTO;
 import sep.firstbank.dtos.RedirectUrlDTO;
+import sep.firstbank.exceptions.CurrencyUnsupportedException;
 import sep.firstbank.model.Account;
 import sep.firstbank.model.Invoice;
 import sep.firstbank.repositories.AccountRepository;
@@ -25,20 +26,26 @@ public class InvoiceService {
     private final InvoiceRepository invoiceRepository;
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
+    private final ExchangeService exchangeService;
     private final PSPClient pspClient;
     @Value("${front.url}")
     private String frontUrl;
 
     @Autowired
-    public InvoiceService(InvoiceRepository invoiceRepository, TransactionRepository transactionRepository, AccountRepository accountRepository, PSPClient pspClient) {
+    public InvoiceService(InvoiceRepository invoiceRepository, TransactionRepository transactionRepository, AccountRepository accountRepository, ExchangeService exchangeService, PSPClient pspClient) {
         this.invoiceRepository = invoiceRepository;
         this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
+        this.exchangeService = exchangeService;
         this.pspClient = pspClient;
     }
 
-    public InvoiceResponseDTO generateResponse(InvoiceDTO dto) throws AccountNotFoundException {
+    public InvoiceResponseDTO generateResponse(InvoiceDTO dto) throws AccountNotFoundException, CurrencyUnsupportedException {
         Account account = validate(dto);
+        if (!exchangeService.conversionSupported(dto.getCurrency(), account.getCurrency())) {
+            log.info("Invalid currency conversion attempt (" + dto.getCurrency() + " to " + account.getCurrency() + ')');
+            throw new CurrencyUnsupportedException("Invoice currency unsupported");
+        }
         Invoice invoice = invoiceRepository.save(new Invoice(dto, account));
         log.info("Invoice (id=" + invoice.getId() + ") for account (id=" + account.getId() + ") created");
         return new InvoiceResponseDTO(frontUrl + "make-payment/" + invoice.getId(), invoice.getId());

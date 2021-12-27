@@ -3,6 +3,7 @@ package sep.firstbank.dtos;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import sep.firstbank.model.Currency;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -14,6 +15,7 @@ public class InvoiceDTO {
     private long mId;
     private String mPassword;
     private BigDecimal amount;
+    private Currency currency;
     private long merchantOrderId;
     private long requestId;
     private LocalDateTime merchantTimestamp;

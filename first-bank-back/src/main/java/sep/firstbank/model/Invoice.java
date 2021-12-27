@@ -24,6 +24,9 @@ public class Invoice {
     private BigDecimal amount;
 
     @Column
+    private Currency currency;
+
+    @Column
     private long accountId;
 
     @Column
@@ -52,6 +55,7 @@ public class Invoice {
 
     public Invoice(InvoiceDTO dto, Account account){
         this.amount = dto.getAmount();
+        this.currency = dto.getCurrency();
         this.accountId = account.getId();
         this.merchantOrderId = dto.getMerchantOrderId();
         this.requestId = dto.getRequestId();

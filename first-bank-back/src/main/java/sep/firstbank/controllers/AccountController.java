@@ -59,7 +59,7 @@ public class AccountController {
             } catch (CreditCardInfoNotValidException | CreditCardNotFoundException e) {
                 return ResponseEntity.ok(invoiceService.notifyError(invoice, e.getMessage()));
             }
-        } catch (InvoiceNotFoundException e) {
+        } catch (InvoiceNotFoundException | CurrencyUnsupportedException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

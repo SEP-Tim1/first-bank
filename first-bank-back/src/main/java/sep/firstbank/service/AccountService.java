@@ -18,6 +18,7 @@ import sep.firstbank.util.CreditCardValidator;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import javax.security.auth.login.AccountNotFoundException;
+import java.math.BigDecimal;
 
 @Slf4j
 @Service
@@ -27,15 +28,17 @@ public class AccountService {
     private final CreditCardService cardService;
     private final InvoiceRepository invoiceRepository;
     private final TransactionRepository transactionRepository;
+    private final ExchangeService exchangeService;
     private static final long MIG = 603759;
     private static final String BANK_NUMBER = "00000";
 
     @Autowired
-    public AccountService(AccountRepository accountRepository, CreditCardService cardService, InvoiceRepository invoiceRepository, TransactionRepository transactionRepository){
+    public AccountService(AccountRepository accountRepository, CreditCardService cardService, InvoiceRepository invoiceRepository, TransactionRepository transactionRepository, ExchangeService exchangeService){
         this.accountRepository = accountRepository;
         this.cardService = cardService;
         this.invoiceRepository = invoiceRepository;
         this.transactionRepository = transactionRepository;
+        this.exchangeService = exchangeService;
     }
 
     public Account getById(long id) throws AccountNotFoundException {
@@ -64,12 +67,12 @@ public class AccountService {
         return invoiceRepository.findById(invoiceId).get();
     }
 
-    public Invoice pay(CardInfoDTO dto, Invoice invoice) throws InvoiceAlreadyPaidException, NoMoneyException, CreditCardNotFoundException, CreditCardInfoNotValidException {
+    public Invoice pay(CardInfoDTO dto, Invoice invoice) throws InvoiceAlreadyPaidException, NoMoneyException, CreditCardNotFoundException, CreditCardInfoNotValidException, CurrencyUnsupportedException {
         if(isCardInThisBank(dto.getPan())) return payInThisBank(dto, invoice);
         return callPCC(dto, invoice);
     }
 
-    private Invoice payInThisBank(CardInfoDTO dto, Invoice invoice) throws InvoiceAlreadyPaidException, CreditCardNotFoundException, CreditCardInfoNotValidException, NoMoneyException {
+    private Invoice payInThisBank(CardInfoDTO dto, Invoice invoice) throws InvoiceAlreadyPaidException, CreditCardNotFoundException, CreditCardInfoNotValidException, NoMoneyException, CurrencyUnsupportedException {
         CreditCard card = cardService.getByPAN(dto.getPan());
         CreditCardValidator.validate(card, dto);
         if (invoice.getTransaction() != null) {
@@ -79,19 +82,27 @@ public class AccountService {
         return makeTransaction(card, invoice);
     }
 
-    private Invoice makeTransaction(CreditCard card, Invoice invoice) throws NoMoneyException {
+    private Invoice makeTransaction(CreditCard card, Invoice invoice) throws NoMoneyException, CurrencyUnsupportedException {
         Account buyer = accountRepository.getById(card.getAccountId());
+        if(!exchangeService.conversionSupported(buyer.getCurrency(), invoice.getCurrency())) {
+            log.info("Invalid currency conversion attempt (" + buyer.getCurrency() + " to " + invoice.getCurrency() + ')');
+            throw new CurrencyUnsupportedException("Your account's currency is not supported");
+        }
         Account seller = accountRepository.getById(invoice.getAccountId());
-        if (buyer.getBalance().compareTo(invoice.getAmount()) > 0) {
+        BigDecimal buyerDiff = exchangeService.exchange(invoice.getCurrency(), invoice.getAmount(), buyer.getCurrency());
+        BigDecimal sellerDiff = exchangeService.exchange(invoice.getCurrency(), invoice.getAmount(), seller.getCurrency());
+        if (buyer.getBalance().compareTo(buyerDiff) > 0) {
             Transaction transaction = transactionRepository.save(new Transaction(invoice, buyer.getId(), seller.getId()));
             invoice.setTransaction(transaction);
             invoiceRepository.save(invoice);
-            buyer.setBalance(buyer.getBalance().subtract(invoice.getAmount()));
-            seller.setBalance(seller.getBalance().add(invoice.getAmount()));
+            buyer.setBalance(buyer.getBalance().subtract(buyerDiff));
+            seller.setBalance(seller.getBalance().add(sellerDiff));
             accountRepository.save(buyer);
             accountRepository.save(seller);
             log.info("Transaction (id=" + transaction.getId() + ") created for invoice (id=" + invoice.getId() +
                     ") - seller account id=" + seller.getId() + " buyer account id=" + buyer.getId());
+            log.info("Account (id=" + buyer.getId() + ") new balance is " + buyer.getBalance());
+            log.info("Account (id=" + seller.getId() + ") new balance is " + seller.getBalance());
             return invoice;
         } else {
             log.info("Unsuccessful transaction (insufficient funds) for invoice (id=" + invoice.getId() +
