@@ -9,8 +9,8 @@ Configuration:
 
     RollingFile:
       - name: LogToRollingFile
-        fileName: logs/app.log
-        filePattern: "logs/$${date:yyyy-MM}/app-%d{MM-dd-yyyy}-%i.log"
+        fileName: D:\\logs\\first-bank\\app.log
+        filePattern: "D:\\logs\\first-bank\\archive\\$${date:yyyy-MM}\\app-%d{MM-dd-yyyy}-%i.log"
         PatternLayout:
           pattern: "[%level{length=5}] %d{ISO8601_OFFSET_DATE_TIME_HH} [%t] %c{2} - %M - %m%n"
         Policies:

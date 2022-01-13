@@ -53,37 +53,35 @@ public class InvoiceService {
 
     public Account validate(InvoiceDTO dto) throws AccountNotFoundException {
         Account account = accountRepository.findByMerchantIdAndMerchantPassword(dto.getMId(), dto.getMPassword());
-        if (account == null) throw new AccountNotFoundException();
+        if (account == null) {
+            throw new AccountNotFoundException();
+        }
         return account;
     }
 
     public RedirectUrlDTO notifySuccess(Invoice invoice, String message){
         PaymentResponseDTO dto = new PaymentResponseDTO("SUCCESS", invoice.getMerchantOrderId(), invoice.getRequestId(), invoice.getId(), invoice.getTransaction().getCreated(), invoice.getId(), message);
-        try{
-            pspClient.bankPaymentResponse(URI.create(invoice.getCallbackUrl()), dto);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        notifyPSP(dto, invoice.getCallbackUrl());
         return new RedirectUrlDTO(invoice.getSuccessUrl());
     }
 
     public RedirectUrlDTO notifyError(Invoice invoice, String message){
         PaymentResponseDTO dto = new PaymentResponseDTO("ERROR", invoice.getMerchantOrderId(), invoice.getRequestId(), invoice.getId(), LocalDateTime.now(), invoice.getId(), message);
-        try{
-            pspClient.bankPaymentResponse(URI.create(invoice.getCallbackUrl()), dto);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        notifyPSP(dto, invoice.getCallbackUrl());
         return new RedirectUrlDTO(invoice.getErrorUrl());
     }
 
     public RedirectUrlDTO notifyFailure(Invoice invoice, String message){
         PaymentResponseDTO dto = new PaymentResponseDTO("FAILURE", invoice.getMerchantOrderId(), invoice.getRequestId(), invoice.getId(), LocalDateTime.now(), invoice.getId(), message);
-        try{
-            pspClient.bankPaymentResponse(URI.create(invoice.getCallbackUrl()), dto);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        notifyPSP(dto, invoice.getCallbackUrl());
         return new RedirectUrlDTO(invoice.getFailureUrl());
+    }
+
+    public void notifyPSP(PaymentResponseDTO response, String url) {
+        try{
+            pspClient.bankPaymentResponse(URI.create(url), response);
+        } catch (Exception e) {
+            return;
+        }
     }
 }
