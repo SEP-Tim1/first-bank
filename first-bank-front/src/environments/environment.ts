@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  banka1: 'http://localhost:8061',
+  banka1: 'https://localhost:8061',
 };
 
 /*
