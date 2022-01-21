@@ -4,6 +4,7 @@ import com.sun.istack.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import sep.firstbank.util.SensitiveDataConverter;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -33,6 +34,7 @@ public class Account {
     private long merchantId;
 
     @Column(name = "m_password")
+    @Convert(converter = SensitiveDataConverter.class)
     private String merchantPassword;
 
     @OneToMany()

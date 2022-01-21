@@ -4,6 +4,7 @@ import com.sun.istack.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import sep.firstbank.util.SensitiveDataConverter;
 
 import javax.persistence.*;
 import javax.validation.constraints.Pattern;
@@ -27,11 +28,13 @@ public class CreditCard {
     @Column(name = "pan", length = 16, unique = true)
     @NotNull
     @Pattern(regexp = "\\d{16}", message = "Invalid PAN number")
+    @Convert(converter = SensitiveDataConverter.class)
     private String PAN;
 
     @Column(name = "security_code", length = 3)
     @NotNull
     @Pattern(regexp = "\\d{3}", message = "Invalid CVC number")
+    @Convert(converter = SensitiveDataConverter.class)
     private String securityCode;
 
     @Column(name="expiration_date")
