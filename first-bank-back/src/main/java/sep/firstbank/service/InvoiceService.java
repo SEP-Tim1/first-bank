@@ -5,17 +5,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import sep.firstbank.clients.PSPClient;
-import sep.firstbank.dtos.InvoiceDTO;
-import sep.firstbank.dtos.InvoiceResponseDTO;
-import sep.firstbank.dtos.PaymentResponseDTO;
-import sep.firstbank.dtos.RedirectUrlDTO;
+import sep.firstbank.dtos.*;
 import sep.firstbank.exceptions.CurrencyUnsupportedException;
+import sep.firstbank.exceptions.InvoiceNotFoundException;
 import sep.firstbank.model.Account;
 import sep.firstbank.model.Invoice;
 import sep.firstbank.repositories.AccountRepository;
 import sep.firstbank.repositories.InvoiceRepository;
 import sep.firstbank.repositories.TransactionRepository;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.security.auth.login.AccountNotFoundException;
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -83,5 +82,16 @@ public class InvoiceService {
         } catch (Exception e) {
             return;
         }
+    }
+
+    public InvoiceCustomerInfoDTO get(long id) throws InvoiceNotFoundException {
+         Invoice invoice = invoiceRepository.findById(id).orElse(null);
+         if (invoice == null) {
+             throw new InvoiceNotFoundException();
+         }
+         InvoiceCustomerInfoDTO result = new InvoiceCustomerInfoDTO();
+         result.setAmount(invoice.getAmount().longValue());
+         result.setCurrency(invoice.getCurrency().toString());
+         return result;
     }
 }

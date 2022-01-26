@@ -50,7 +50,7 @@ public class AccountController {
     @PostMapping(value = "payment/{invoiceId}")
     public ResponseEntity<?> pay(@Valid @RequestBody CardInfoDTO dto, @PathVariable long invoiceId){
         try {
-            Invoice invoice = accountService.getInvoice(dto, invoiceId);
+            Invoice invoice = accountService.getInvoice(invoiceId);
             try {
                 invoice = accountService.pay(dto, invoice);
                 return ResponseEntity.ok(invoiceService.notifySuccess(invoice, ""));

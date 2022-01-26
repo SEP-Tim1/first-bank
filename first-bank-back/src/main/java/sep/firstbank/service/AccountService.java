@@ -62,23 +62,27 @@ public class AccountService {
         return new MerchantDTO(a.getMerchantId(), a.getMerchantPassword());
     }
 
-    public Invoice getInvoice(CardInfoDTO dto, long invoiceId) throws InvoiceNotFoundException {
-        if (!invoiceRepository.findById(invoiceId).isPresent()) throw new InvoiceNotFoundException();
+    public Invoice getInvoice(long invoiceId) throws InvoiceNotFoundException {
+        if (!invoiceRepository.findById(invoiceId).isPresent()) {
+            throw new InvoiceNotFoundException();
+        }
         return invoiceRepository.findById(invoiceId).get();
     }
 
     public Invoice pay(CardInfoDTO dto, Invoice invoice) throws InvoiceAlreadyPaidException, NoMoneyException, CreditCardNotFoundException, CreditCardInfoNotValidException, CurrencyUnsupportedException {
-        if(isCardInThisBank(dto.getPan())) return payInThisBank(dto, invoice);
-        return callPCC(dto, invoice);
-    }
-
-    private Invoice payInThisBank(CardInfoDTO dto, Invoice invoice) throws InvoiceAlreadyPaidException, CreditCardNotFoundException, CreditCardInfoNotValidException, NoMoneyException, CurrencyUnsupportedException {
-        CreditCard card = cardService.getByPAN(dto.getPan());
-        CreditCardValidator.validate(card, dto);
         if (invoice.getTransaction() != null) {
             log.warn("Attempt to pay invoice (id=" + invoice.getId() + ") that was already payed for");
             throw new InvoiceAlreadyPaidException();
         }
+        if(isCardInThisBank(dto.getPan())) {
+            return payInThisBank(dto, invoice);
+        }
+        return callPCC(dto, invoice);
+    }
+
+    private Invoice payInThisBank(CardInfoDTO dto, Invoice invoice) throws CreditCardNotFoundException, CreditCardInfoNotValidException, NoMoneyException, CurrencyUnsupportedException {
+        CreditCard card = cardService.getByPAN(dto.getPan());
+        CreditCardValidator.validate(card, dto);
         return makeTransaction(card, invoice);
     }
 

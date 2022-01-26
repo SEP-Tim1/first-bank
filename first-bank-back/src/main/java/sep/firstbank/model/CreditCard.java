@@ -25,15 +25,13 @@ public class CreditCard {
     @NotNull
     private String cardHolderName;
 
-    @Column(name = "pan", length = 16, unique = true)
+    @Column(name = "pan", unique = true)
     @NotNull
-    @Pattern(regexp = "\\d{16}", message = "Invalid PAN number")
     @Convert(converter = SensitiveDataConverter.class)
     private String PAN;
 
-    @Column(name = "security_code", length = 3)
+    @Column(name = "security_code")
     @NotNull
-    @Pattern(regexp = "\\d{3}", message = "Invalid CVC number")
     @Convert(converter = SensitiveDataConverter.class)
     private String securityCode;
 

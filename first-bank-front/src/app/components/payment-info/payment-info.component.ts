@@ -14,6 +14,7 @@ import { BankService } from 'src/app/service/bank.service';
 export class PaymentInfoComponent implements OnInit {
   dto = new CardInfoDTO('', '', '', '');
   purchaseId = -1;
+  invoice: any;
 
   panControl = new FormControl('', [
     Validators.required,
@@ -40,12 +41,14 @@ export class PaymentInfoComponent implements OnInit {
   constructor(
     private _snackBar: MatSnackBar,
     private _service: BankService,
-    private router: Router,
     private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
     this.purchaseId = Number(this.route.snapshot.paramMap.get('id'));
+    this._service.getInvoice(this.purchaseId).subscribe(
+      response => this.invoice = response
+    )
   }
 
   submit() {

@@ -40,7 +40,7 @@ public class Transaction {
         this.fromId = fromId;
         this.toId = toId;
         this.amount = invoice.getAmount();
-        this.currency = "RSD";
+        this.currency = invoice.getCurrency().toString();
         this.created = LocalDateTime.now();
     }
 

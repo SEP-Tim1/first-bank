@@ -12,6 +12,7 @@ import { RedirectUrlDTO } from '../dtos/RedirectUrlDTO';
 export class BankService {
   registerUrl = environment.banka1 + '/account/register';
   payUrl = environment.banka1 + '/account/payment/';
+  invoiceUrl = environment.banka1 + '/invoice/';
 
   constructor(private _http: HttpClient) {}
 
@@ -21,5 +22,9 @@ export class BankService {
 
   pay(invoiceId: number, dto: CardInfoDTO): Observable<RedirectUrlDTO> {
     return this._http.post<RedirectUrlDTO>(this.payUrl + invoiceId, dto);
+  }
+
+  getInvoice(id: number): Observable<any> {
+    return this._http.get(this.invoiceUrl + id);
   }
 }
