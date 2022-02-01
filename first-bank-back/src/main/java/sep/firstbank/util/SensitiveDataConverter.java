@@ -10,24 +10,35 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 import javax.persistence.AttributeConverter;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.NoSuchAlgorithmException;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.security.*;
+import java.security.cert.CertificateException;
 import java.util.Base64;
 
 @Component
 public class SensitiveDataConverter implements AttributeConverter<String, String> {
 
     private static final String AES = "AES";
-    @Value("${encryption.key}")
-    private String SECRET;
+    @Value("${encryption.keystore-name}")
+    private String keystoreName;
+    @Value("${encryption.keystore-password}")
+    private String keystorePassword;
+    @Value("${encryption.keystore-entry-name}")
+    private String entryName;
+    @Value("${encryption.keystore-entry-password}")
+    private String entryPassword;
 
     private Key key;
     private Cipher cipher;
 
     @PostConstruct
-    public void Initialize() throws NoSuchPaddingException, NoSuchAlgorithmException {
-        key = new SecretKeySpec(SECRET.getBytes(), AES);
+    public void Initialize() throws NoSuchPaddingException, NoSuchAlgorithmException, IOException, KeyStoreException, CertificateException, UnrecoverableKeyException {
+        FileInputStream fis = new FileInputStream(keystoreName);
+        KeyStore ks = KeyStore.getInstance("PKCS12");
+        ks.load(fis, keystorePassword.toCharArray());
+        key = ks.getKey(entryName, entryPassword.toCharArray());
+        key = new SecretKeySpec(key.getEncoded(), AES);
         cipher = Cipher.getInstance(AES);
     }
 
