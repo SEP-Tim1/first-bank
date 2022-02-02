@@ -124,7 +124,7 @@ public class AccountService {
         BigDecimal amountToMove = exchangeService.exchange(invoice.getCurrency(), invoice.getAmount(), seller.getCurrency());
 
         PCCRequestDTO request = new PCCRequestDTO(invoice.getId(), invoice.getTransaction().getCreated(), dto.getPan(), dto.getCardHolderName(), dto.getExpirationDate(), dto.getSecurityCode(), amountToMove, seller.getCurrency().toString(), seller.getId());
-        PCCResponseDTO response = pccClient.bankPaymentResponse(URI.create("abgk"),request);
+        PCCResponseDTO response = pccClient.bankPaymentResponse(URI.create("${pcc.transfer}"),request);
 
         Transaction transaction = transactionRepository.save(new Transaction(invoice, response.getFromId(), seller.getId()));
         invoice.setTransaction(transaction);
