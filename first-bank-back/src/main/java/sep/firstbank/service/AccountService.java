@@ -3,9 +3,8 @@ package sep.firstbank.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import sep.firstbank.dtos.CardInfoDTO;
-import sep.firstbank.dtos.MerchantCredentialsDTO;
-import sep.firstbank.dtos.MerchantDTO;
+import sep.firstbank.clients.PccClient;
+import sep.firstbank.dtos.*;
 import sep.firstbank.exceptions.*;
 import sep.firstbank.model.Account;
 import sep.firstbank.model.CreditCard;
@@ -19,6 +18,8 @@ import org.apache.commons.lang3.RandomStringUtils;
 
 import javax.security.auth.login.AccountNotFoundException;
 import java.math.BigDecimal;
+import java.net.URI;
+import java.time.LocalDateTime;
 
 @Slf4j
 @Service
@@ -29,16 +30,18 @@ public class AccountService {
     private final InvoiceRepository invoiceRepository;
     private final TransactionRepository transactionRepository;
     private final ExchangeService exchangeService;
+    private final PccClient pccClient;
     private static final long MIG = 603759;
     private static final String BANK_NUMBER = "00000";
 
     @Autowired
-    public AccountService(AccountRepository accountRepository, CreditCardService cardService, InvoiceRepository invoiceRepository, TransactionRepository transactionRepository, ExchangeService exchangeService){
+    public AccountService(AccountRepository accountRepository, CreditCardService cardService, InvoiceRepository invoiceRepository, TransactionRepository transactionRepository, ExchangeService exchangeService, PccClient pccClient){
         this.accountRepository = accountRepository;
         this.cardService = cardService;
         this.invoiceRepository = invoiceRepository;
         this.transactionRepository = transactionRepository;
         this.exchangeService = exchangeService;
+        this.pccClient = pccClient;
     }
 
     public Account getById(long id) throws AccountNotFoundException {
@@ -117,7 +120,37 @@ public class AccountService {
 
     private Invoice callPCC(CardInfoDTO dto, Invoice invoice){
         //TODO : make pcc client and second bank
+        Account seller = accountRepository.getById(invoice.getAccountId());
+        BigDecimal amountToMove = exchangeService.exchange(invoice.getCurrency(), invoice.getAmount(), seller.getCurrency());
+
+        PCCRequestDTO request = new PCCRequestDTO(invoice.getId(), invoice.getTransaction().getCreated(), dto.getPan(), dto.getCardHolderName(), dto.getExpirationDate(), dto.getSecurityCode(), amountToMove, seller.getCurrency().toString(), seller.getId());
+        PCCResponseDTO response = pccClient.bankPaymentResponse(URI.create("abgk"),request);
+
+        Transaction transaction = transactionRepository.save(new Transaction(invoice, response.getFromId(), seller.getId()));
+        invoice.setTransaction(transaction);
+        invoiceRepository.save(invoice);
+        seller.setBalance(seller.getBalance().add(amountToMove));
+        accountRepository.save(seller);
+
         return invoice;
+    }
+
+    private Transaction receiveRequestFromPcc (PCCRequestDTO request) throws CreditCardNotFoundException, NoMoneyException {
+        CreditCard card = cardService.getByPAN(request.getPanNumber());
+        if(!isCardInThisBank(card.getPAN()))
+            throw new CreditCardNotFoundException();
+        Account buyer = accountRepository.getById(card.getAccountId());
+
+        if (buyer.getBalance().compareTo(request.getAmount()) > 0) {
+            Transaction transaction = transactionRepository.save(new Transaction( buyer.getId(), request.getToId(), request.getAmount(), request.getCurrency(), LocalDateTime.now()));
+
+            buyer.setBalance(buyer.getBalance().subtract(request.getAmount()));
+            accountRepository.save(buyer);
+            return transaction;
+        } else {
+            throw new NoMoneyException();
+        }
+
     }
 
     private boolean isCardInThisBank(String pan){
