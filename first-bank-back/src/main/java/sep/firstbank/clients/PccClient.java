@@ -8,7 +8,7 @@ import sep.firstbank.dtos.PCCResponseDTO;
 
 import java.net.URI;
 
-@FeignClient(name="a", url="a")
+@FeignClient(name="b", url="b")
 public interface PccClient {
 
     @PostMapping
