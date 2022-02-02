@@ -13,11 +13,11 @@ public class PCCResponseDTO {
 
     private String status;
 
-    private String acquirerOrderId;
+    private long acquirerOrderId;
 
     private LocalDateTime acquirerTimestamp;
 
-    private String issuerOrderId;
+    private long issuerOrderId;
 
     private LocalDateTime issuerTimestamp;
 

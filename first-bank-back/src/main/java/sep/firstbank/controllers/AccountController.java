@@ -1,10 +1,13 @@
 package sep.firstbank.controllers;
 
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sep.firstbank.dtos.CardInfoDTO;
 import sep.firstbank.dtos.MerchantCredentialsDTO;
+import sep.firstbank.dtos.PCCRequestDTO;
+import sep.firstbank.dtos.PCCResponseDTO;
 import sep.firstbank.exceptions.*;
 import sep.firstbank.model.Account;
 import sep.firstbank.model.Invoice;
@@ -62,6 +65,11 @@ public class AccountController {
         } catch (InvoiceNotFoundException | CurrencyUnsupportedException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @PostMapping("receiveRequestFromPCC")
+    public PCCResponseDTO receivePccRequest(@RequestBody PCCRequestDTO dto) throws CreditCardNotFoundException {
+        return accountService.receiveRequestFromPcc(dto);
     }
 
     @PostMapping("validate")

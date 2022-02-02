@@ -135,7 +135,7 @@ public class AccountService {
         return invoice;
     }
 
-    private Transaction receiveRequestFromPcc (PCCRequestDTO request) throws CreditCardNotFoundException, NoMoneyException {
+    public PCCResponseDTO receiveRequestFromPcc (PCCRequestDTO request) throws CreditCardNotFoundException {
         CreditCard card = cardService.getByPAN(request.getPanNumber());
         if(!isCardInThisBank(card.getPAN()))
             throw new CreditCardNotFoundException();
@@ -146,9 +146,11 @@ public class AccountService {
 
             buyer.setBalance(buyer.getBalance().subtract(request.getAmount()));
             accountRepository.save(buyer);
-            return transaction;
+            PCCResponseDTO response = new PCCResponseDTO("SUCCESS", request.getAcquirerOrderId(), request.getAcquirerTimeStamp(), request.getToId(), transaction.getCreated(), buyer.getId());
+            return response;
         } else {
-            throw new NoMoneyException();
+            PCCResponseDTO response = new PCCResponseDTO("NO_MONEY", request.getAcquirerOrderId(), request.getAcquirerTimeStamp(), request.getToId(), LocalDateTime.now(), buyer.getId());
+            return response;
         }
 
     }
