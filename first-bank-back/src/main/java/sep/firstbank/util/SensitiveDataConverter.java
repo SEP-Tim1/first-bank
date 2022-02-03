@@ -56,6 +56,7 @@ public class SensitiveDataConverter implements AttributeConverter<String, String
     public String convertToEntityAttribute(String dbData) {
         try {
             cipher.init(Cipher.DECRYPT_MODE, key);
+            if (dbData.isEmpty() || dbData.isBlank()) return "";
             return new String(cipher.doFinal(Base64.getDecoder().decode(dbData)));
         } catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException e) {
             throw new IllegalStateException(e);

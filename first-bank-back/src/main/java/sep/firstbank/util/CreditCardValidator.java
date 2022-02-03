@@ -7,6 +7,8 @@ import sep.firstbank.model.CreditCard;
 import java.time.LocalDate;
 
 public class CreditCardValidator {
+    //private static final SensitiveDataConverter sensitiveDataConverter = new SensitiveDataConverter();
+
     public static void validate (CreditCard card, CardInfoDTO dto) throws CreditCardInfoNotValidException {
         if(!validateExpirationDate(card.getExpirationDate(), dto.getExpirationDate())
                 || !validateCardHolderName(card.getCardHolderName(), dto.getCardHolderName())
@@ -47,5 +49,5 @@ public class CreditCardValidator {
     private static int getYear(String dtoDate){
         return Integer.parseInt(dtoDate.split("/")[1]);
     }
-
+    //private static String hash(String attribute) { return sensitiveDataConverter.convertToDatabaseColumn(attribute); }
 }

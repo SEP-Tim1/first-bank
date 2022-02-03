@@ -1,6 +1,5 @@
 package sep.firstbank.controllers;
 
-import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +12,7 @@ import sep.firstbank.model.Account;
 import sep.firstbank.model.Invoice;
 import sep.firstbank.service.AccountService;
 import sep.firstbank.service.InvoiceService;
+import sep.firstbank.util.SensitiveDataConverter;
 
 import javax.security.auth.login.AccountNotFoundException;
 import javax.validation.Valid;
@@ -23,6 +23,7 @@ public class AccountController {
 
     private final AccountService accountService;
     private final InvoiceService invoiceService;
+
 
     public AccountController(AccountService accountService, InvoiceService invoiceService) {
         this.accountService = accountService;
@@ -57,7 +58,7 @@ public class AccountController {
             try {
                 invoice = accountService.pay(dto, invoice);
                 return ResponseEntity.ok(invoiceService.notifySuccess(invoice, ""));
-            } catch (InvoiceAlreadyPaidException | NoMoneyException e) {
+            } catch (InvoiceAlreadyPaidException | NoMoneyException | ExternalTransferException e) {
                 return ResponseEntity.ok(invoiceService.notifyFailure(invoice, e.getMessage()));
             } catch (CreditCardInfoNotValidException | CreditCardNotFoundException e) {
                 return ResponseEntity.ok(invoiceService.notifyError(invoice, e.getMessage()));
@@ -68,7 +69,7 @@ public class AccountController {
     }
 
     @PostMapping("receiveRequestFromPCC")
-    public PCCResponseDTO receivePccRequest(@RequestBody PCCRequestDTO dto) throws CreditCardNotFoundException {
+    public PCCResponseDTO receivePccRequest(@RequestBody PCCRequestDTO dto) {
         return accountService.receiveRequestFromPcc(dto);
     }
 
