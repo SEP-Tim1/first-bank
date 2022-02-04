@@ -2,6 +2,7 @@ package sep.firstbank.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import sep.firstbank.clients.PccClient;
 import sep.firstbank.dtos.*;
@@ -36,6 +37,10 @@ public class AccountService {
     private final PccClient pccClient;
     private static final long MIG = 603759;
     private static final String BANK_NUMBER = "00000";
+
+    @Value("${pcc.url-transfer}")
+    private String pccUrl;
+
 
     @Autowired
     public AccountService(AccountRepository accountRepository, CreditCardService cardService, InvoiceRepository invoiceRepository, TransactionRepository transactionRepository, ExchangeService exchangeService, SensitiveDataConverter sensitiveDataConverter, PccClient pccClient){
@@ -134,7 +139,7 @@ public class AccountService {
         BigDecimal amountToMove = exchangeService.exchange(invoice.getCurrency(), invoice.getAmount(), seller.getCurrency());
 
         PCCRequestDTO request = new PCCRequestDTO(invoice.getId(), LocalDateTime.now(), dto.getPan(), dto.getCardHolderName(), dto.getExpirationDate(), dto.getSecurityCode(), amountToMove, seller.getCurrency().toString(), seller.getId());
-        PCCResponseDTO response = pccClient.bankPaymentResponse(URI.create("https://localhost:8060/pcc/transfer"),request);
+        PCCResponseDTO response = pccClient.bankPaymentResponse(URI.create(pccUrl), request);
         if (response.getStatus().equals("SUCCESS")) {
             Transaction transaction = transactionRepository.save(new Transaction(invoice, response.getFromId(), seller.getId()));
             invoice.setTransaction(transaction);
