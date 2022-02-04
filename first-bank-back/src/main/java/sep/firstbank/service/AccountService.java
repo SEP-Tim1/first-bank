@@ -64,7 +64,7 @@ public class AccountService {
     }
 
     public MerchantDTO register(CardInfoDTO dto) throws CreditCardNotFoundException, CreditCardInfoNotValidException, AccountNotFoundException {
-//        String hashedPAN = sensitiveDataConverter.convertToDatabaseColumn(dto.getPan());
+        String pan = sensitiveDataConverter.convertToDatabaseColumn(dto.getPan());
         CreditCard card = cardService.getByPAN(dto.getPan());
         CreditCardValidator.validate(card, dto);
         Account a = getById(card.getAccountId());

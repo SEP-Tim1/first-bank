@@ -34,7 +34,7 @@ public class Account {
     private long merchantId;
 
     @Column(name = "m_password")
-    //@Convert(converter = SensitiveDataConverter.class)
+    @Convert(converter = SensitiveDataConverter.class)
     private String merchantPassword;
 
     @OneToMany()
