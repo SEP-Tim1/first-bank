@@ -3,14 +3,16 @@
     <form (submit)="submit()" #feedform="ngForm" style="width: 80%" novalidate>
       <h2 style="text-align: center">Insert Credit Card Info</h2>
 
-      <p style="text-align: center;">Total price is {{invoice.amount}} {{invoice.currency}}</p>
+      <p style="text-align: center">
+        Total price is {{ invoice.amount }} {{ invoice.currency }}
+      </p>
       <div class="center">
         <mat-form-field style="width: 100%">
           <mat-label>PAN</mat-label>
           <input
             matInput
             [(ngModel)]="dto.pan"
-            name="pan"
+            name="cardNumber"
             maxlength="16"
             style="height: 40%"
             [formControl]="panControl"
