@@ -64,7 +64,7 @@ public class AccountService {
     }
 
     public MerchantDTO register(CardInfoDTO dto) throws CreditCardNotFoundException, CreditCardInfoNotValidException, AccountNotFoundException {
-        String pan = sensitiveDataConverter.convertToDatabaseColumn(dto.getPan());
+        //String pan = sensitiveDataConverter.convertToDatabaseColumn(dto.getPan());
         CreditCard card = cardService.getByPAN(dto.getPan());
         CreditCardValidator.validate(card, dto);
         Account a = getById(card.getAccountId());
@@ -133,8 +133,8 @@ public class AccountService {
         Account seller = accountRepository.getById(invoice.getAccountId());
         BigDecimal amountToMove = exchangeService.exchange(invoice.getCurrency(), invoice.getAmount(), seller.getCurrency());
 
-        PCCRequestDTO request = new PCCRequestDTO(invoice.getId(), invoice.getTransaction().getCreated(), dto.getPan(), dto.getCardHolderName(), dto.getExpirationDate(), dto.getSecurityCode(), amountToMove, seller.getCurrency().toString(), seller.getId());
-        PCCResponseDTO response = pccClient.bankPaymentResponse(URI.create("${pcc.transfer}"),request);
+        PCCRequestDTO request = new PCCRequestDTO(invoice.getId(), LocalDateTime.now(), dto.getPan(), dto.getCardHolderName(), dto.getExpirationDate(), dto.getSecurityCode(), amountToMove, seller.getCurrency().toString(), seller.getId());
+        PCCResponseDTO response = pccClient.bankPaymentResponse(URI.create("https://localhost:8060/pcc/transfer"),request);
         if (response.getStatus().equals("SUCCESS")) {
             Transaction transaction = transactionRepository.save(new Transaction(invoice, response.getFromId(), seller.getId()));
             invoice.setTransaction(transaction);
@@ -174,7 +174,7 @@ public class AccountService {
     }
 
     private boolean isCardInThisBank(String pan){
-        String cardBankNumber = pan.substring(1, 6);
+        String cardBankNumber = pan.substring(0, 5);
         return cardBankNumber.equals(BANK_NUMBER);
     }
 }
