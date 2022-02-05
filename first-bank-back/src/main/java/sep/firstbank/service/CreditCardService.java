@@ -6,8 +6,6 @@ import sep.firstbank.exceptions.CreditCardNotFoundException;
 import sep.firstbank.model.CreditCard;
 import sep.firstbank.repositories.CreditCardRepository;
 
-import java.time.LocalDate;
-
 @Service
 public class CreditCardService {
     private final CreditCardRepository cardRepository;

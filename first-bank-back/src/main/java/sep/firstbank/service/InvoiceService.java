@@ -12,9 +12,7 @@ import sep.firstbank.model.Account;
 import sep.firstbank.model.Invoice;
 import sep.firstbank.repositories.AccountRepository;
 import sep.firstbank.repositories.InvoiceRepository;
-import sep.firstbank.repositories.TransactionRepository;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import javax.security.auth.login.AccountNotFoundException;
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -23,7 +21,6 @@ import java.time.LocalDateTime;
 @Service
 public class InvoiceService {
     private final InvoiceRepository invoiceRepository;
-    private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
     private final ExchangeService exchangeService;
     private final PSPClient pspClient;
@@ -31,9 +28,8 @@ public class InvoiceService {
     private String frontUrl;
 
     @Autowired
-    public InvoiceService(InvoiceRepository invoiceRepository, TransactionRepository transactionRepository, AccountRepository accountRepository, ExchangeService exchangeService, PSPClient pspClient) {
+    public InvoiceService(InvoiceRepository invoiceRepository, AccountRepository accountRepository, ExchangeService exchangeService, PSPClient pspClient) {
         this.invoiceRepository = invoiceRepository;
-        this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
         this.exchangeService = exchangeService;
         this.pspClient = pspClient;
@@ -80,7 +76,7 @@ public class InvoiceService {
         try{
             pspClient.bankPaymentResponse(URI.create(url), response);
         } catch (Exception e) {
-            return;
+            e.printStackTrace();
         }
     }
 
