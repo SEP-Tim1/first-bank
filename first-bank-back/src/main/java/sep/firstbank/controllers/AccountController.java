@@ -1,8 +1,10 @@
 package sep.firstbank.controllers;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import sep.firstbank.dtos.CardInfoDTO;
 import sep.firstbank.dtos.MerchantCredentialsDTO;
 import sep.firstbank.dtos.PCCRequestDTO;
@@ -16,6 +18,7 @@ import sep.firstbank.util.SensitiveDataConverter;
 
 import javax.security.auth.login.AccountNotFoundException;
 import javax.validation.Valid;
+import java.io.IOException;
 
 @RestController
 @RequestMapping("account")
@@ -61,6 +64,24 @@ public class AccountController {
             } catch (InvoiceAlreadyPaidException | NoMoneyException | ExternalTransferException e) {
                 return ResponseEntity.ok(invoiceService.notifyFailure(invoice, e.getMessage()));
             } catch (CreditCardInfoNotValidException | CreditCardNotFoundException e) {
+                return ResponseEntity.ok(invoiceService.notifyError(invoice, e.getMessage()));
+            }
+        } catch (InvoiceNotFoundException | CurrencyUnsupportedException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping(value = "paymentQR/{invoiceId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> payWithQR(@RequestParam("imageFile") MultipartFile qrCode,  @PathVariable long invoiceId){
+        try{
+            Invoice invoice = accountService.getInvoice(invoiceId);
+
+            try {
+                invoice = accountService.payWithQR(qrCode, invoice);
+                return ResponseEntity.ok(invoiceService.notifySuccess(invoice, ""));
+            } catch (InvoiceAlreadyPaidException | NoMoneyException | ExternalTransferException e) {
+                return ResponseEntity.ok(invoiceService.notifyFailure(invoice, e.getMessage()));
+            } catch (CreditCardInfoNotValidException | CreditCardNotFoundException | IOException e) {
                 return ResponseEntity.ok(invoiceService.notifyError(invoice, e.getMessage()));
             }
         } catch (InvoiceNotFoundException | CurrencyUnsupportedException e) {
