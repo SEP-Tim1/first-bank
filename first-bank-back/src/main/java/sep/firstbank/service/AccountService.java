@@ -27,7 +27,6 @@ import sep.firstbank.repositories.InvoiceRepository;
 import sep.firstbank.repositories.TransactionRepository;
 import sep.firstbank.util.CreditCardValidator;
 import org.apache.commons.lang3.RandomStringUtils;
-import sep.firstbank.util.SensitiveDataConverter;
 
 import javax.imageio.ImageIO;
 import javax.security.auth.login.AccountNotFoundException;
@@ -35,7 +34,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.nio.file.Files;
@@ -52,7 +50,7 @@ public class AccountService {
     private final InvoiceRepository invoiceRepository;
     private final TransactionRepository transactionRepository;
     private final ExchangeService exchangeService;
-    private final SensitiveDataConverter sensitiveDataConverter;
+    //private final SensitiveDataConverter sensitiveDataConverter;
     private final PccClient pccClient;
     private static final long MIG = 603759;
     private static final String BANK_NUMBER = "00000";
@@ -62,13 +60,12 @@ public class AccountService {
 
 
     @Autowired
-    public AccountService(AccountRepository accountRepository, CreditCardService cardService, InvoiceRepository invoiceRepository, TransactionRepository transactionRepository, ExchangeService exchangeService, SensitiveDataConverter sensitiveDataConverter, PccClient pccClient){
+    public AccountService(AccountRepository accountRepository, CreditCardService cardService, InvoiceRepository invoiceRepository, TransactionRepository transactionRepository, ExchangeService exchangeService, PccClient pccClient){
         this.accountRepository = accountRepository;
         this.cardService = cardService;
         this.invoiceRepository = invoiceRepository;
         this.transactionRepository = transactionRepository;
         this.exchangeService = exchangeService;
-        this.sensitiveDataConverter = sensitiveDataConverter;
         this.pccClient = pccClient;
     }
 
@@ -218,8 +215,7 @@ public class AccountService {
 
     private CardInfoDTO createCardInfo(String decodedResult){
         String[] tokens = decodedResult.split(";");
-        CardInfoDTO cardInfo = new CardInfoDTO(tokens[0], tokens[1], tokens[2], tokens[3]);
-        return cardInfo;
+        return new CardInfoDTO(tokens[0], tokens[1], tokens[2], tokens[3]);
     }
 
     private String getDecodedString(MultipartFile qrCode) throws IOException {
